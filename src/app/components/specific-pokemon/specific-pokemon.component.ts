@@ -1,21 +1,23 @@
 import { Component, OnInit } from '@angular/core'
-import { ActivatedRoute } from '@angular/router'
-import { pluck } from 'rxjs/operators'
+import { SpecificPokemonService } from './specific-pokemon.service'
 
 @Component({
   selector: 'app-specific-pokemon',
   template: `
-    <p>
-      specific-pokemon works!
-      <br />
-      id: {{ pokemonId$ | async }}
-    </p>
+    <ng-container *ngIf="pokemon$ | async as p">
+      {{ p.name }}
+      <img
+        src="{{ p.sprites.front_default }}"
+        alt="A sprite of the pokemon {{ p.name }}."
+      />
+    </ng-container>
   `,
   styles: [],
+  providers: [SpecificPokemonService],
 })
 export class SpecificPokemonComponent implements OnInit {
-  pokemonId$ = this.route.params.pipe(pluck('id'))
-  constructor(private readonly route: ActivatedRoute) {}
+  pokemon$ = this.service.specificPokemon$
+  constructor(private readonly service: SpecificPokemonService) {}
 
   ngOnInit(): void {}
 }

@@ -5,7 +5,7 @@ import {
   AllPokemonDto,
   LocalStorageKeys,
   LocalStorageKeysEnum,
-  Pokemon,
+  BasicPokemon,
 } from '../models'
 import { map, pluck, switchMap, tap, withLatestFrom } from 'rxjs/operators'
 import { LocalStorageService } from './local-storage.service'
@@ -14,7 +14,7 @@ import { LocalStorageService } from './local-storage.service'
   providedIn: 'root',
 })
 export class AllPokemonService {
-  private readonly pokemon = new BehaviorSubject<Pokemon[]>([])
+  private readonly pokemon = new BehaviorSubject<BasicPokemon[]>([])
   pokemon$ = this.pokemon.asObservable()
 
   constructor(
@@ -27,7 +27,7 @@ export class AllPokemonService {
       .pipe(
         withLatestFrom(this.localStorage.storage$),
         map(([, x]) => x[LocalStorageKeys.Pokemon]),
-        switchMap((ps: Pokemon[] | undefined) => {
+        switchMap((ps: BasicPokemon[] | undefined) => {
           if (ps) {
             return of(ps)
           } else {
@@ -35,7 +35,7 @@ export class AllPokemonService {
               .get<AllPokemonDto[]>(`pokemon/?offset=${0}&limit=${2000}`)
               .pipe(
                 pluck('results'),
-                map((ps: Pokemon[]) => this.mapIds(ps)),
+                map((ps: BasicPokemon[]) => this.mapIds(ps)),
                 tap(ps =>
                   this.localStorage.setStorage(LocalStorageKeysEnum.Pokemon, ps)
                 )
@@ -46,7 +46,7 @@ export class AllPokemonService {
       .subscribe(x => this.pokemon.next(x))
   }
 
-  private mapIds(ps: Pokemon[]) {
+  private mapIds(ps: BasicPokemon[]) {
     return ps.map(p => {
       const { url } = p
       const lastSlash = url.lastIndexOf('/')
